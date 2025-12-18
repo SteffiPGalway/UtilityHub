@@ -1,6 +1,12 @@
 import requests
 
 def github_repos(user):
+    """Fetch public GitHub repositories for a given user.
+    Args:
+        user (str): GitHub username
+    Returns:
+        list: List of tuples (repo_name, repo_url)
+    """
     url = f"https://api.github.com/users/{user}/repos"
     response = requests.get(url)
     response.raise_for_status()
