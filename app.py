@@ -2,11 +2,16 @@ from tasks.portfolio_generator import github_repos, generate_portfolio_html
 from tasks.currency_converter import convert_currency
 from tasks.youtube_audio import download_youtube_video
 from tasks.translate_text import translate_text
+from tasks.download_files import download_file
 from tasks.stockprice import get_stock_price
+from tasks.rename_files import rename_files
 from tasks.merge_pdf import merge_pdfs
 from tasks.weather import get_weather
 from dotenv import load_dotenv
+from pathlib import Path
 import streamlit as st
+import requests
+import zipfile
 import asyncio
 import os
 
@@ -166,6 +171,35 @@ with col5:
         else:
             st.warning("Please enter some stock symbols.")
 
+with col6:
+    st.markdown("### 📥 File Downloader")
+    st.caption("Download a file from a given URL.")
+
+    # Input: file URL
+    file_url = st.text_input("Enter the URL of the file to download")
+
+    if st.button("Download File"):
+        if file_url:
+            save_dir = Path("downloaded_files")
+            save_dir.mkdir(exist_ok=True)
+
+            # Extract filename from URL
+            filename = file_url.split("/")[-1] or "downloaded_file"
+            save_path = save_dir / filename
+
+            # Use your function to download
+            download_file(file_url, save_path)
+            st.success(f"Downloaded {filename} successfully!")
+
+            # Provide download button for the user
+            with open(save_path, "rb") as f:
+                st.download_button(
+                    label="⬇️ Download File to Desktop",
+                    data=f,
+                    file_name=filename,
+                    mime="application/octet-stream"
+                )
+
 col7, col8, col9 = st.columns(3)
 
 # ----- TILE 7: Language Translation -----
@@ -204,6 +238,52 @@ with col8:
                 st.success(f"{amount:.2f} {from_currency} = {result:.2f} {to_currency}") 
             except Exception as e: 
                 st.error("⚠️ Currency service is temporarily unavailable. Please try again later.")
+
+# ----- TILE 9: File Renamer -----
+with col9:
+    st.markdown("### ✏️ File Renamer")
+    st.caption("Upload files and rename them with a specified prefix.")
+
+    # Upload multiple files
+    uploaded_files = st.file_uploader(
+        "Upload files to rename", 
+        accept_multiple_files=True
+    )
+
+    prefix = st.text_input("Enter prefix for files", "file")
+
+    if uploaded_files and prefix:
+        save_dir = Path("uploaded_files")
+        save_dir.mkdir(exist_ok=True)
+
+        # Save uploaded files locally
+        for uploaded_file in uploaded_files:
+            with open(save_dir / uploaded_file.name, "wb") as f:
+                f.write(uploaded_file.getbuffer())
+        
+        if st.button("Rename Files"):
+            rename_files(str(save_dir), prefix)
+            st.success("Files renamed successfully!")
+
+            # Zip the renamed files
+            zip_path = "renamed_files.zip"
+            with zipfile.ZipFile(zip_path, "w") as zipf:
+                for file in os.listdir(save_dir):
+                    zipf.write(save_dir / file, arcname=file)
+
+            # Provide download link
+            with open(zip_path, "rb") as f:
+                st.download_button(
+                    label="⬇️ Download Renamed Files",
+                    data=f,
+                    file_name="renamed_files.zip",
+                    mime="application/zip"
+                )
+            
+            # Show renamed files
+            st.write("Renamed files:")
+            st.write(os.listdir(save_dir))
+
 
 col10, col11, col12 = st.columns(3)
 
