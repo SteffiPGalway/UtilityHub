@@ -31,7 +31,7 @@ with col1:
                 try:
                     price_series = get_stock_price(ticker)
                     latest_price = price_series.iloc[-1]  # last available close
-                    # st.metric(f"The latest closing price of {ticker} is ${latest_price:.2f}")
+                    st.metric(f"The latest closing price of {ticker} is ${latest_price:.2f}")
                     st.metric(
                         label=f"{ticker} Latest Closing Price",
                         value=f"${latest_price:.2f}",
