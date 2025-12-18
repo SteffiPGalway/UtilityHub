@@ -43,7 +43,8 @@ with col1:
 
 # ----- TILE 2: YouTube Downloader -----
 with col2:
-    st.title("🎬 YouTube Downloader")
+    st.markdown("### 🎬 YouTube Downloader")
+    st.caption("Paste a YouTube link to download the video.")
     yt_url = st.text_input("Paste YouTube URL here:")
 
     # Optional: checkbox for audio-only download
