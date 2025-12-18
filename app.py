@@ -42,36 +42,37 @@ with col1:
                 st.warning("Please enter a stock ticker.")
 
 # ----- TILE 2: YouTube Downloader -----
-with col2:
-    with st.container():
-        st.markdown("### 🎥 YouTube Downloader")
-        st.caption("Paste a YouTube link to download the video.")
+st.title("🎬 YouTube Downloader")
 
-        yt_url = st.text_input("YouTube Video URL", key="youtube_url")
+yt_url = st.text_input("Paste YouTube URL here:")
 
-        if st.button("Download Video", key="download_video_btn"):
-            if yt_url.strip():
-                try:
-                    os.makedirs("downloads", exist_ok=True)
-                    filepath = download_youtube_video(
-                        yt_url,
-                        output_path="downloads",
-                        filename="video.mp4"
-                    )
+# Optional: checkbox for audio-only download
+audio_only = st.checkbox("Audio only (MP3)")
 
-                    with open(filepath, "rb") as f:
-                        st.download_button(
-                            label="⬇ Download MP4",
-                            data=f,
-                            file_name="video.mp4",
-                            mime="video/mp4"
-                        )
-                    st.success("✅ Video downloaded successfully!")
+if st.button("Download"):
+    if yt_url.strip():
+        # Attempt download
+        filepath = download_youtube_video(
+            yt_url,
+            output_path="downloads",
+            filename="video.mp4" if not audio_only else "audio.mp3",
+            audio_only=audio_only
+        )
 
-                except Exception as e:
-                    st.error(f"Download failed: {e}")
-            else:
-                st.warning("Please enter a valid YouTube URL.")
+        if filepath:
+            # Provide download button
+            with open(filepath, "rb") as f:
+                st.download_button(
+                    label=f"⬇ Download {'Audio' if audio_only else 'Video'}",
+                    data=f,
+                    file_name=os.path.basename(filepath),
+                    mime="audio/mpeg" if audio_only else "video/mp4"
+                )
+            st.success("✅ Download completed successfully!")
+        else:
+            st.error("❌ Download failed. YouTube may be blocking this request on Streamlit Cloud.")
+    else:
+        st.warning("Please enter a valid YouTube URL.")
 
 # ----- TILE 3: Weather Update -----
 with col3:
